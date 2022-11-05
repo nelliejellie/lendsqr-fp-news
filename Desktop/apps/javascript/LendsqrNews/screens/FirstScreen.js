@@ -2,13 +2,15 @@ import { View, Text, Image } from 'react-native'
 import React, {useLayoutEffect} from 'react'
 import tw from 'tailwind-react-native-classnames';
 import { useNavigation } from '@react-navigation/native';
+import BlueButton from '../components/BlueButton';
+import SignUpButton from '../components/SignUpButton';
 
 
 const FirstScreen = () => {
   const navigation = useNavigation()
   
   return (
-    <View style={tw`bg-white`}>
+    <View style={tw`bg-white flex-1`}>
       <View style={tw`flex flex-row m-3`}>
         <Image
           source={{
@@ -26,11 +28,19 @@ const FirstScreen = () => {
           style={{ width: 300, height: 300 }}
         />
       </View>
-      <View>
-        <Text>Welcome</Text>
-        <Text>
-          to the best news platform there is
+      <View style={tw`mx-auto mt-10`}>
+        <Text style={tw`text-center font-bold text-2xl`}>Welcome !</Text>
+        <Text style={tw`text-center font-semibold`}>
+          To the best news platform there is
         </Text>
+      </View>
+      <View>
+        <BlueButton>
+          Login
+        </BlueButton>
+      </View>
+      <View>
+        <SignUpButton/>
       </View>
     </View>
     
