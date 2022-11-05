@@ -1,18 +1,17 @@
-import { View, Text, TextInput, Image, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { View, Text, TextInput, Image, Pressable, TouchableWithoutFeedback, Keyboard, Button } from 'react-native'
 import React, {useLayoutEffect, useState, useEffect} from 'react'
 import tw from 'tailwind-react-native-classnames';
 import { useNavigation } from '@react-navigation/native';
 import BlueButton from '../components/BlueButton';
 import { Icon } from 'react-native-elements';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword, onAuthStateChanged, updateUser } from 'firebase/auth'
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-  } from 'react-native-google-signin';
+import { signInWithEmailAndPassword, onAuthStateChanged,updateUser } from 'firebase/auth';
 import { setCurrentUser } from '../store/slices/authslice'
 import { useDispatch } from 'react-redux'
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 
 const LoginScreen = () => {
@@ -21,8 +20,6 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [login, setLogin] = useState('login')
-  const [loggedIn, setloggedIn] = useState(false);
-  const [userInfo, setuserInfo] = useState([]);
 
   useLayoutEffect(()=>{
     navigation.setOptions({
@@ -34,38 +31,10 @@ const LoginScreen = () => {
   useEffect(() => {
     onAuthStateChanged(auth, (currentUser) => {
         updateUser(currentUser);
+        navigation.replace('Home')
     });
-
-    GoogleSignin.configure({
-      scopes: ['email'], // what API you want to access on behalf of the user, default is email and profile
-      webClientId:
-        '418977770929-g9ou7r9eva1u78a3anassxxxxxxx.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
-      offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
-    });
-
   }, [])
 
-  const loginWithGoogle = async () =>{
-    try {
-      await GoogleSignin.hasPlayServices();
-      const {accessToken, idToken} = await GoogleSignin.signIn();
-      setloggedIn(true);
-      navigation.replace('Home')
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-        alert('Cancel');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        alert('Signin in progress');
-        // operation (f.e. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        alert('PLAY_SERVICES_NOT_AVAILABLE');
-        // play services not available or outdated
-      } else {
-        // some other error happened
-      }
-    }
-  }
   const signIn = async() => {
     try {
       setLogin('login in...')
@@ -77,6 +46,7 @@ const LoginScreen = () => {
       }));
       navigation.replace('Home')
     } catch (error) {
+      setLogin("login")
       alert(error)
     }
     
@@ -118,24 +88,32 @@ const LoginScreen = () => {
         <Text style={tw`text-lg font-bold text-center`}>
           Social Media Login
         </Text>
-        <Pressable style={tw`mx-auto`} onPress={loginWithGoogle}>
-          <Image
-            source={{
-              uri: 'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
-            }}
-            style={{ width: 30, height: 30 }}
+        <Pressable style={tw`mx-auto`}>
+          <Button title={'Sign in with Google'} onPress={() =>  {
+            GoogleSignin.configure({
+                androidClientId: '166373312830-vkp70v672j43r0trs6pelhfeqg6nnp2p.apps.googleusercontent.com',
+            });
+              GoogleSignin.hasPlayServices().then((hasPlayService) => {
+                      if (hasPlayService) {
+                          GoogleSignin.signIn().then((userInfo) => {
+                                    console.log(JSON.stringify(userInfo))
+                          }).catch((e) => {
+                          console.log("ERROR IS: " + JSON.stringify(e));
+                          })
+                      }
+              }).catch((e) => {
+                  console.log("ERROR IS: " + JSON.stringify(e));
+              })
+            }} 
           />
-          {/* <GoogleSigninButton
-            style={{width: 192, height: 48}}
-            size={GoogleSigninButton.Size.Wide}
-            color={GoogleSigninButton.Color.Dark}
-            onPress={this._signIn}
-          /> */}
+
         </Pressable>
       </View>
       <View style={tw`flex flex-row ml-10 font-bold mx-auto mt-10`}>
         <Text>Don't have an account?</Text>
-        <Text style={tw`pl-4 font-bold text-blue-800`}>Sign up</Text>
+        <Pressable onPress={()=>{navigation.navigate("Register")}}>
+          <Text style={tw`pl-4 font-bold text-blue-800`}>Sign up.</Text>
+        </Pressable>
       </View>
     </View>
   )
