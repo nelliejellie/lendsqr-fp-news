@@ -1,15 +1,14 @@
-import { View, Text, TextInput, Image, Pressable, TouchableWithoutFeedback, Keyboard, Button } from 'react-native'
+import { View, Text, TextInput, Pressable, TouchableWithoutFeedback, Keyboard, Button } from 'react-native'
 import React, {useLayoutEffect, useState, useEffect} from 'react'
 import tw from 'tailwind-react-native-classnames';
 import { useNavigation } from '@react-navigation/native';
-import BlueButton from '../components/BlueButton';
-import { Icon } from 'react-native-elements';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged,updateUser } from 'firebase/auth';
 import { setCurrentUser } from '../store/slices/authslice'
 import { useDispatch } from 'react-redux'
 import {
   GoogleSignin,
+  GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 
@@ -29,12 +28,72 @@ const LoginScreen = () => {
   })
 
   useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-        updateUser(currentUser);
-        navigation.replace('Home')
-    });
+    auth.onAuthStateChanged((authUser)=>{
+      if(authUser){
+          navigation.replace("Home")
+      }
+    })
+    isSignedIn()
   }, [])
 
+  useEffect(()=>{
+    GoogleSignin.configure({
+      webClientId:"652393634549-ut8pt3hfpcm6nr459dp4ha2gc6k9k2qv.apps.googleusercontent.com",
+      offlineAccess: true,
+      forceCodeForRefreshToken: true
+    })
+  })
+
+  const GoogleSignInUser = async () =>{
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log("due", userInfo)
+      navigation.navigate("Home")
+    } catch (error) {
+      console.log(error)
+      if(error.code === statusCodes.SIGN_IN_CANCELLED){
+        console.log("user canceled the login flow")
+      }else if(error.code === statusCodes.IN_PROGRESS){
+        console.log("signing in")
+      }else if(error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE){
+        console.log("play services not available")
+      }else{
+        alert("something went wrong")
+      }
+    }
+  }
+  
+  const isSignedIn = async () => {
+    const isSignedIn = await GoogleSignin.isSignedIn(); 
+    if(!isSignedIn){
+      getCurrentUserInfo()
+    }else{
+      alert("please login")
+    }
+  }
+
+  const getCurrentUserInfo = async() =>{
+    try {
+      const userInfo = await GoogleSignin.signInSilently();
+      console.log(userInfo)
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_REQUIRED){
+        alert('user has not signed in')
+      }else{
+        alert('something went wrong')
+      }
+    }
+  }
+
+  const signOut = async () =>{
+    try {
+      await GoogleSignin.revokeAccess()
+      await GoogleSignin.signOut()
+    } catch (error) {
+      alert("error")
+    }
+  }
   const signIn = async() => {
     try {
       setLogin('login in...')
@@ -88,26 +147,14 @@ const LoginScreen = () => {
         <Text style={tw`text-lg font-bold text-center`}>
           Social Media Login
         </Text>
-        <Pressable style={tw`mx-auto`}>
-          <Button title={'Sign in with Google'} onPress={() =>  {
-            GoogleSignin.configure({
-                androidClientId: '166373312830-vkp70v672j43r0trs6pelhfeqg6nnp2p.apps.googleusercontent.com',
-            });
-              GoogleSignin.hasPlayServices().then((hasPlayService) => {
-                      if (hasPlayService) {
-                          GoogleSignin.signIn().then((userInfo) => {
-                                    console.log(JSON.stringify(userInfo))
-                          }).catch((e) => {
-                          console.log("ERROR IS: " + JSON.stringify(e));
-                          })
-                      }
-              }).catch((e) => {
-                  console.log("ERROR IS: " + JSON.stringify(e));
-              })
-            }} 
-          />
-
-        </Pressable>
+        <View style={tw`mx-auto`}>
+         <GoogleSigninButton
+          style={{ width: 192, height: 48 }}
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={GoogleSignInUser}
+         />
+        </View>
       </View>
       <View style={tw`flex flex-row ml-10 font-bold mx-auto mt-10`}>
         <Text>Don't have an account?</Text>

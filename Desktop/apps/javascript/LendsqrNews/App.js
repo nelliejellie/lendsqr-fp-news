@@ -2,11 +2,12 @@ import {KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-n
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack'
+import "react-native-gesture-handler"
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
-import "react-native-gesture-handler"
 import FirstScreen from './screens/FirstScreen';
 import HomeScreen from './screens/HomeScreen';
+import DetailScreen from './screens/DetailScreen';
 import { store } from './store/store';
 import { Provider } from 'react-redux';
 
@@ -45,6 +46,10 @@ const App = () => {
                 <Stack.Screen
                   name='Home'
                   component={HomeScreen}
+                />
+                <Stack.Screen
+                  name='Detail'
+                  component={DetailScreen}
                 />
               </Stack.Navigator>
             </NavigationContainer>

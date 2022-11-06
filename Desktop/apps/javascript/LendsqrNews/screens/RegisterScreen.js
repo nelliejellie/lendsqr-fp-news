@@ -51,18 +51,6 @@ const RegisterScreen = () => {
     }
   }
 
-  const loginWithGoogle = async() =>{
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-    .then((re)=>{
-      alert(re)
-      navigation.replace('Home')
-    })
-    .catch((err)=>{
-      alert(err)
-    })
-  }
-
   return (
     <View style={tw`flex flex-1 bg-white pt-8`}>
       <Text style={tw`capitalize text-black text-4xl font-bold ml-8`}>Hi !</Text>
@@ -107,7 +95,7 @@ const RegisterScreen = () => {
         <Text style={tw`text-lg font-bold text-center`}>
           Social Media Login
         </Text>
-        <Pressable style={tw`mx-auto`} onPress={loginWithGoogle}>
+        <Pressable style={tw`mx-auto`} onPress={()=>{navigation.navigate("Login")}}>
           <Image
             source={{
               uri: 'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'

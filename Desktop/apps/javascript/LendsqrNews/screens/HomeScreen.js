@@ -22,7 +22,16 @@ const HomeScreen = () => {
         setNews(response.articles)
       ))
       .catch(err => console.error(err));
+  }
+
+  const goToDetail = (item) =>{
+    navigation.navigate(
+      'Detail',
+      {
+        paramKey:item
       }
+    )
+  }
 
   useEffect(()=>{
     getNews()
@@ -57,7 +66,7 @@ const HomeScreen = () => {
           keyExtractor={(item)=>(item._id)}
           renderItem={({item})=>(
             <View style={tw`flex m-2 bg-white w-4/5 rounded-lg ml-10`}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={()=>{goToDetail(item)}}>
                 <View style={tw`mx-auto`}>
                   <View style={tw`w-full mx-auto mt-4`}>
                     <Image
